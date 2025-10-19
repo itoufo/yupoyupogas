@@ -465,28 +465,45 @@ function execute12ZodiacStep2(sheet, apiKey, theme, subThemes) {
   // E5以降に出力
   let currentRow = 5;
   const zodiacOrder = ['牡羊座', '牡牛座', '双子座', '蟹座', '獅子座', '乙女座', '天秤座', '蠍座', '射手座', '山羊座', '水瓶座', '魚座'];
+  const zodiacDisplay = ['牡羊座', '牡牛座', '双子座', '蟹　座', '獅子座', '乙女座', '天秤座', '蠍　座', '射手座', '山羊座', '水瓶座', '魚　座'];
 
   parsedData.contents.forEach((content, index) => {
-    // サブテーマヘッダー
-    sheet.getRange(currentRow, 5).setValue(`【${content.subtheme}】`).setFontWeight('bold').setBackground('#ffd966');
-    currentRow++;
+    // サブテーマヘッダー + 12星座分のデータを1つのセルにまとめる
+    let formattedText = `【${content.subtheme}】\n`;
 
-    // 12星座分のデータ
-    zodiacOrder.forEach(zodiac => {
+    zodiacOrder.forEach((zodiac, idx) => {
       const text = content.zodiac_texts[zodiac] || '';
-      sheet.getRange(currentRow, 5).setValue(zodiac);
-      sheet.getRange(currentRow, 6).setValue(text);
-      currentRow++;
+      formattedText += `${zodiacDisplay[idx]}：${text}\n`;
     });
 
-    // 空行
+    // 末尾の改行を削除
+    formattedText = formattedText.trim();
+
+    // E列に出力（複数行結合）
+    sheet.getRange(currentRow, 5, 1, 2).merge()
+         .setValue(formattedText)
+         .setWrap(true)
+         .setVerticalAlignment('top')
+         .setFontSize(10);
+
     currentRow++;
   });
 
-  // キャプション出力
-  sheet.getRange(currentRow, 5).setValue('【Instagramキャプション】').setFontWeight('bold').setBackground('#b6d7a8');
+  // 空行
   currentRow++;
-  sheet.getRange(currentRow, 5, 1, 3).merge().setValue(parsedData.instagram_caption).setWrap(true);
+
+  // キャプション出力
+  sheet.getRange(currentRow, 5, 1, 2).merge()
+       .setValue('【Instagramキャプション】')
+       .setFontWeight('bold')
+       .setBackground('#b6d7a8')
+       .setHorizontalAlignment('center');
+  currentRow++;
+
+  sheet.getRange(currentRow, 5, 1, 2).merge()
+       .setValue(parsedData.instagram_caption)
+       .setWrap(true)
+       .setVerticalAlignment('top');
 
   // ログ出力
   addLog(sheet, '12星座STEP2: コンテンツ生成', promptContents, contentsJson, startTime, endTime);
@@ -531,8 +548,7 @@ function initialize12ZodiacSheet() {
   sheet.getRange('B1').setValue('📋 STEP1プロンプト');
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
   sheet.getRange('D1').setValue('✨ STEP1出力');
-  sheet.getRange('E1').setValue('💫 12星座コンテンツ');
-  sheet.getRange('F1').setValue('内容');
+  sheet.getRange('E1:F1').merge().setValue('💫 12星座コンテンツ');
   sheet.getRange('N1').setValue('📊 実行ログ');
   sheet.getRange('O1').setValue('リクエスト');
   sheet.getRange('P1').setValue('レスポンス');
@@ -544,7 +560,7 @@ function initialize12ZodiacSheet() {
   sheet.getRange('B4').setValue('▼ STEP1プロンプト本文');
   sheet.getRange('C4').setValue('▼ STEP2プロンプト本文');
   sheet.getRange('D4').setValue('▼ STEP1出力本文');
-  sheet.getRange('E4').setValue('▼ STEP2出力');
+  sheet.getRange('E4:F4').merge().setValue('▼ STEP2出力');
 
   // デフォルトプロンプトを配置（5行目から縦10行結合）
   const defaultPrompt1 = getZodiacThemesPrompt('{{theme}}');
@@ -596,8 +612,8 @@ function format12ZodiacSheet(sheet) {
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
-  // STEP2出力（E5以降）
-  sheet.getRange('E5:F').setBackground('#d9d2e9').setWrap(true);
+  // STEP2出力（E5:F以降）
+  sheet.getRange('E:F').setBackground('#d9d2e9').setWrap(true);
 
   // ログエリア（N列以降）
   sheet.getRange('N:P').setBackground('#ead1dc').setWrap(true);
@@ -607,8 +623,7 @@ function format12ZodiacSheet(sheet) {
   sheet.setColumnWidth(2, 450);  // B列（STEP1プロンプト）
   sheet.setColumnWidth(3, 450);  // C列（STEP2プロンプト）
   sheet.setColumnWidth(4, 350);  // D列（STEP1出力）
-  sheet.setColumnWidth(5, 180);  // E列（星座/サブテーマ）
-  sheet.setColumnWidth(6, 250);  // F列（内容）
+  sheet.setColumnWidths(5, 2, 250); // E-F列（12星座コンテンツ）
   sheet.setColumnWidth(14, 150); // N列（タイムスタンプ）
   sheet.setColumnWidth(15, 350); // O列（リクエスト）
   sheet.setColumnWidth(16, 350); // P列（レスポンス）
