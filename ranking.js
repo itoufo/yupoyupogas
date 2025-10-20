@@ -18,12 +18,12 @@ function generateRankingContent() {
     return;
   }
 
-  // 既存出力クリア（D5:E34, F5:O以降）
+  // 既存出力クリア（D5:E34, F5:X以降）
   sheet.getRange('D5:E34').clearContent();
   const lastRow = sheet.getLastRow();
   if (lastRow >= 5) {
-    // F列（6）からO列（15）までクリア（10列）
-    sheet.getRange(5, 6, Math.max(1, lastRow - 4), 10).clearContent();
+    // F列（6）からX列（24）までクリア（横並び10列＋縦並び6列＋余裕）
+    sheet.getRange(5, 6, Math.max(1, lastRow - 4), 19).clearContent();
   }
 
   // STEP1実行
@@ -32,7 +32,7 @@ function generateRankingContent() {
   // STEP2実行
   executeRankingStep2(sheet, apiKey, theme, type, designText);
 
-  SpreadsheetApp.getUi().alert('完了：D5:E34にランキング設計、F5以降にランキング30位（横並び3表）＋キャプションを出力しました。');
+  SpreadsheetApp.getUi().alert('完了：D5:E34にランキング設計、F5以降に横並び版、S5以降に縦並び版を出力しました。');
 }
 
 /* ===== STEP1のみ実行 ===== */
@@ -83,17 +83,17 @@ function generateRankingStep2Only() {
     return;
   }
 
-  // STEP2出力エリアのみクリア（F5:O以降）
+  // STEP2出力エリアのみクリア（F5:X以降）
   const lastRow = sheet.getLastRow();
   if (lastRow >= 5) {
-    // F列（6）からO列（15）までクリア（10列）
-    sheet.getRange(5, 6, Math.max(1, lastRow - 4), 10).clearContent();
+    // F列（6）からX列（24）までクリア（横並び10列＋縦並び6列＋余裕）
+    sheet.getRange(5, 6, Math.max(1, lastRow - 4), 19).clearContent();
   }
 
   // STEP2実行
   executeRankingStep2(sheet, apiKey, theme, type, designText);
 
-  SpreadsheetApp.getUi().alert('STEP2完了：F5以降にランキング30位（横並び3表）＋キャプションを出力しました。');
+  SpreadsheetApp.getUi().alert('STEP2完了：F5以降に横並び版、S5以降に縦並び版を出力しました。');
 }
 
 /* ===== STEP1実行（共通処理） ===== */
@@ -148,13 +148,21 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
     return;
   }
 
-  // F5以降に横並びで出力（1〜10位、11〜20位、21〜30位を3つの表に分割）
+  // ========== F5以降に横並びで出力 ==========
   let currentRow = 5;
+
+  // 横並びタイトル
+  sheet.getRange(currentRow, 6, 1, 10).merge()
+       .setValue('【横並びレイアウト】')
+       .setFontWeight('bold')
+       .setBackground('#93c47d')
+       .setFontColor('#ffffff')
+       .setHorizontalAlignment('center');
+  currentRow++;
 
   // 3つのブロックに分けて出力
   for (let blockIndex = 0; blockIndex < 3; blockIndex++) {
     const startRank = blockIndex * 10 + 1;
-    const endRank = startRank + 9;
 
     // ヘッダー行（順位）
     const headerData = [];
@@ -188,15 +196,62 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
     currentRow++;
   }
 
-  // キャプション出力
-  sheet.getRange(currentRow, 6, 1, 10).merge()
+  // ========== S5以降に縦並びで出力 ==========
+  currentRow = 5;
+  const verticalStartCol = 19; // S列
+
+  // 縦並びタイトル
+  sheet.getRange(currentRow, verticalStartCol, 1, 6).merge()
+       .setValue('【縦並びレイアウト】')
+       .setFontWeight('bold')
+       .setBackground('#93c47d')
+       .setFontColor('#ffffff')
+       .setHorizontalAlignment('center');
+  currentRow++;
+
+  // 3つのブロックに分けて出力（縦に10行ずつ）
+  for (let blockIndex = 0; blockIndex < 3; blockIndex++) {
+    const startRank = blockIndex * 10 + 1;
+    const baseCol = verticalStartCol + (blockIndex * 2); // S列、U列、W列
+
+    // 10行分のデータを縦に出力
+    for (let i = 0; i < 10; i++) {
+      const rank = startRank + i;
+      const rankIndex = blockIndex * 10 + i;
+
+      if (rankIndex < parsedData.rankings.length) {
+        const item = parsedData.rankings[rankIndex];
+
+        // 順位列
+        sheet.getRange(currentRow + i, baseCol)
+             .setValue(`${rank}位`)
+             .setFontWeight('bold')
+             .setBackground('#ffd966')
+             .setHorizontalAlignment('center')
+             .setVerticalAlignment('middle');
+
+        // 内容列
+        sheet.getRange(currentRow + i, baseCol + 1)
+             .setValue(`${item.combination}\n${item.description}`)
+             .setWrap(true)
+             .setVerticalAlignment('top');
+      }
+    }
+  }
+  currentRow += 10;
+
+  // 空行
+  currentRow++;
+
+  // キャプション出力（横並びエリアの下）
+  const captionRow = 5 + 1 + 2 * 3 + 3; // タイトル + (ヘッダー+内容)*3 + 空行*3
+  sheet.getRange(captionRow, 6, 1, 10).merge()
        .setValue('【Instagramキャプション】')
        .setFontWeight('bold')
        .setBackground('#b6d7a8')
        .setHorizontalAlignment('center');
-  currentRow++;
 
-  sheet.getRange(currentRow, 6, 1, 10).merge()
+  sheet.getRange(captionRow + 1, 6, 1, 10).merge()
        .setValue(parsedData.instagram_caption)
        .setWrap(true)
        .setVerticalAlignment('top');
@@ -225,12 +280,13 @@ function initializeRankingSheet() {
   sheet.getRange('B1').setValue('📋 STEP1プロンプト');
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
   sheet.getRange('D1').setValue('✨ STEP1出力');
-  sheet.getRange('F1:O1').merge().setValue('🏆 STEP2出力');
+  sheet.getRange('F1:O1').merge().setValue('🏆 STEP2出力（横並び）');
+  sheet.getRange('S1:X1').merge().setValue('🏆 STEP2出力（縦並び）');
 
   // ログヘッダー（35行目）
-  sheet.getRange('P35').setValue('📊 実行ログ');
-  sheet.getRange('Q35').setValue('リクエスト');
-  sheet.getRange('R35').setValue('レスポンス');
+  sheet.getRange('Y35').setValue('📊 実行ログ');
+  sheet.getRange('Z35').setValue('リクエスト');
+  sheet.getRange('AA35').setValue('レスポンス');
 
   // 入力エリア（2-3行目）
   sheet.getRange('A2').setValue('ランキングテーマを入力（例：2025年の恋愛運）');
@@ -247,7 +303,8 @@ function initializeRankingSheet() {
   sheet.getRange('B4').setValue('▼ STEP1プロンプト本文');
   sheet.getRange('C4').setValue('▼ STEP2プロンプト本文');
   sheet.getRange('D4').setValue('▼ STEP1出力本文');
-  sheet.getRange('F4:O4').merge().setValue('▼ STEP2出力（ランキング30位 - 横並び）');
+  sheet.getRange('F4:O4').merge().setValue('▼ STEP2出力（横並び）');
+  sheet.getRange('S4:X4').merge().setValue('▼ STEP2出力（縦並び）');
 
   // デフォルトプロンプトを配置（5行目から縦30行結合）
   const defaultPrompt1 = getRankingDesignPrompt('{{theme}}', '{{type}}');
@@ -270,14 +327,14 @@ function initializeRankingSheet() {
 /* ===== ランキングシートフォーマッティング ===== */
 function formatRankingSheet(sheet) {
   // ヘッダー行（1行目）をボールド＋背景色
-  const headerRange = sheet.getRange('A1:R1');
+  const headerRange = sheet.getRange('A1:AA1');
   headerRange.setFontWeight('bold')
              .setBackground('#e69138')
              .setFontColor('#ffffff')
              .setHorizontalAlignment('center');
 
   // サブヘッダー行（4行目）をボールド＋背景色
-  const subHeaderRange = sheet.getRange('A4:R4');
+  const subHeaderRange = sheet.getRange('A4:AA4');
   subHeaderRange.setFontWeight('bold')
                 .setBackground('#f6b26b')
                 .setFontColor('#ffffff')
@@ -302,14 +359,17 @@ function formatRankingSheet(sheet) {
   // STEP2出力（F5:O以降）- 横並び10列
   sheet.getRange('F:O').setBackground('#fce5cd').setWrap(true);
 
+  // STEP2出力（S5:X以降）- 縦並び6列
+  sheet.getRange('S:X').setBackground('#d9d2e9').setWrap(true);
+
   // ログヘッダー行（35行目）
-  sheet.getRange('P35:R35').setFontWeight('bold')
+  sheet.getRange('Y35:AA35').setFontWeight('bold')
                            .setBackground('#c27ba0')
                            .setFontColor('#ffffff')
                            .setHorizontalAlignment('center');
 
   // ログエリア（36行目以降）
-  sheet.getRange('P36:R').setBackground('#ead1dc').setWrap(true);
+  sheet.getRange('Y36:AA').setBackground('#ead1dc').setWrap(true);
 
   // 列幅調整
   sheet.setColumnWidth(1, 200);  // A列（入力）
@@ -317,10 +377,22 @@ function formatRankingSheet(sheet) {
   sheet.setColumnWidth(3, 450);  // C列（STEP2プロンプト）
   sheet.setColumnWidth(4, 350);  // D列（STEP1出力）
   sheet.setColumnWidth(5, 50);   // E列（結合用）
-  sheet.setColumnWidths(6, 10, 150); // F-O列（ランキング10列、各150px）
-  sheet.setColumnWidth(16, 150); // P列（タイムスタンプ）
-  sheet.setColumnWidth(17, 350); // Q列（リクエスト）
-  sheet.setColumnWidth(18, 350); // R列（レスポンス）
+  sheet.setColumnWidths(6, 10, 150); // F-O列（横並びランキング10列、各150px）
+  // P〜R列は空白
+  sheet.setColumnWidth(16, 50);  // P列（空白）
+  sheet.setColumnWidth(17, 50);  // Q列（空白）
+  sheet.setColumnWidth(18, 50);  // R列（空白）
+  // S〜X列（縦並びランキング）
+  sheet.setColumnWidth(19, 60);  // S列（順位）
+  sheet.setColumnWidth(20, 200); // T列（内容）
+  sheet.setColumnWidth(21, 60);  // U列（順位）
+  sheet.setColumnWidth(22, 200); // V列（内容）
+  sheet.setColumnWidth(23, 60);  // W列（順位）
+  sheet.setColumnWidth(24, 200); // X列（内容）
+  // ログ列
+  sheet.setColumnWidth(25, 150); // Y列（タイムスタンプ）
+  sheet.setColumnWidth(26, 350); // Z列（リクエスト）
+  sheet.setColumnWidth(27, 350); // AA列（レスポンス）
 
   // 行の高さ調整
   sheet.setRowHeight(1, 40);  // ヘッダー行

@@ -17,7 +17,7 @@ function callGPT5(apiKey, prompt) {
   return json.choices[0].message.content.trim();
 }
 
-/* ===== ログ出力（7分割：N列〜P列、12星座：R列〜T列、ランキング：P列〜R列） ===== */
+/* ===== ログ出力（7分割：N列〜P列、12星座：R列〜T列、ランキング：Y列〜AA列） ===== */
 function addLog(sheet, stepName, request, response, startTime, endTime) {
   const duration = ((endTime - startTime) / 1000).toFixed(2);
 
@@ -25,8 +25,8 @@ function addLog(sheet, stepName, request, response, startTime, endTime) {
   const requestSummary = `[${stepName}]\n実行時間: ${duration}秒\n\nプロンプト:\n${request.substring(0, 500)}${request.length > 500 ? '...' : ''}`;
   const responseSummary = `レスポンス:\n${response.substring(0, 500)}${response.length > 500 ? '...' : ''}`;
 
-  // 機能ごとにログ列を変更（ランキング：P列（16列目）、12星座：R列（18列目）、7分割：N列（14列目））
-  const logColumn = stepName.includes('ランキング') ? 16 : stepName.includes('12星座') ? 18 : 14;
+  // 機能ごとにログ列を変更（ランキング：Y列（25列目）、12星座：R列（18列目）、7分割：N列（14列目））
+  const logColumn = stepName.includes('ランキング') ? 25 : stepName.includes('12星座') ? 18 : 14;
 
   // 36行目以降でログエリアの最後の行を探す（35行目はヘッダー）
   let logRow = 36;
