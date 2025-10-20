@@ -539,19 +539,7 @@ function initialize12ZodiacSheet() {
   sheet.getRange('B1').setValue('📋 STEP1プロンプト');
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
   sheet.getRange('D1').setValue('✨ STEP1出力');
-  sheet.getRange('E1').setValue('サブテーマ');
-  sheet.getRange('F1').setValue('牡羊座');
-  sheet.getRange('G1').setValue('牡牛座');
-  sheet.getRange('H1').setValue('双子座');
-  sheet.getRange('I1').setValue('蟹　座');
-  sheet.getRange('J1').setValue('獅子座');
-  sheet.getRange('K1').setValue('乙女座');
-  sheet.getRange('L1').setValue('天秤座');
-  sheet.getRange('M1').setValue('蠍　座');
-  sheet.getRange('N1').setValue('射手座');
-  sheet.getRange('O1').setValue('山羊座');
-  sheet.getRange('P1').setValue('水瓶座');
-  sheet.getRange('Q1').setValue('魚　座');
+  sheet.getRange('E1:Q1').merge().setValue('💫 STEP2出力');
   sheet.getRange('R1').setValue('📊 実行ログ');
   sheet.getRange('S1').setValue('リクエスト');
   sheet.getRange('T1').setValue('レスポンス');
@@ -559,11 +547,26 @@ function initialize12ZodiacSheet() {
   // 入力エリア（2行目）
   sheet.getRange('A2').setValue('テーマを入力（例：恋愛）');
 
-  // サブヘッダー（4行目）
-  sheet.getRange('B4').setValue('▼ STEP1プロンプト本文');
-  sheet.getRange('C4').setValue('▼ STEP2プロンプト本文');
-  sheet.getRange('D4').setValue('▼ STEP1出力本文');
-  sheet.getRange('E4:Q4').merge().setValue('▼ STEP2出力（横長レイアウト）');
+  // サブヘッダー（3行目）
+  sheet.getRange('B3').setValue('▼ STEP1プロンプト本文');
+  sheet.getRange('C3').setValue('▼ STEP2プロンプト本文');
+  sheet.getRange('D3').setValue('▼ STEP1出力本文');
+  sheet.getRange('E3:Q3').merge().setValue('▼ STEP2出力（横長レイアウト）');
+
+  // 列ヘッダー（4行目）
+  sheet.getRange('E4').setValue('サブテーマ');
+  sheet.getRange('F4').setValue('牡羊座');
+  sheet.getRange('G4').setValue('牡牛座');
+  sheet.getRange('H4').setValue('双子座');
+  sheet.getRange('I4').setValue('蟹　座');
+  sheet.getRange('J4').setValue('獅子座');
+  sheet.getRange('K4').setValue('乙女座');
+  sheet.getRange('L4').setValue('天秤座');
+  sheet.getRange('M4').setValue('蠍　座');
+  sheet.getRange('N4').setValue('射手座');
+  sheet.getRange('O4').setValue('山羊座');
+  sheet.getRange('P4').setValue('水瓶座');
+  sheet.getRange('Q4').setValue('魚　座');
 
   // デフォルトプロンプトを配置（5行目から縦10行結合）
   const defaultPrompt1 = getZodiacThemesPrompt('{{theme}}');
@@ -592,12 +595,19 @@ function format12ZodiacSheet(sheet) {
              .setFontColor('#ffffff')
              .setHorizontalAlignment('center');
 
-  // サブヘッダー行（4行目）をボールド＋背景色
-  const subHeaderRange = sheet.getRange('A4:T4');
+  // サブヘッダー行（3行目）をボールド＋背景色
+  const subHeaderRange = sheet.getRange('A3:T3');
   subHeaderRange.setFontWeight('bold')
                 .setBackground('#93c47d')
                 .setFontColor('#ffffff')
                 .setHorizontalAlignment('center');
+
+  // 列ヘッダー行（4行目）をボールド＋背景色
+  const columnHeaderRange = sheet.getRange('E4:Q4');
+  columnHeaderRange.setFontWeight('bold')
+                   .setBackground('#b6d7a8')
+                   .setFontColor('#000000')
+                   .setHorizontalAlignment('center');
 
   // 入力エリア（A2）
   sheet.getRange('A2').setBackground('#fff2cc');
@@ -634,6 +644,7 @@ function format12ZodiacSheet(sheet) {
 
   // 行の高さ調整
   sheet.setRowHeight(1, 40);  // ヘッダー行
-  sheet.setRowHeight(4, 35);  // サブヘッダー行
+  sheet.setRowHeight(3, 35);  // サブヘッダー行
+  sheet.setRowHeight(4, 30);  // 列ヘッダー行
   sheet.setRowHeights(5, 10, 60); // 5-14行目（結合セル用）
 }
