@@ -30,8 +30,8 @@ function generateFortuneProStoryAndRows() {
   if (!theme)  { SpreadsheetApp.getUi().alert('A2 にテーマを入力してください。'); return; }
   if (!method) { SpreadsheetApp.getUi().alert('A3 に占い手法を入力してください。'); return; }
 
-  // 既存出力クリア（D5:E14, F5:M以降、ログは残す）
-  sheet.getRange('D5:E14').clearContent();
+  // 既存出力クリア（D5:E34, F5:M以降、ログは残す）
+  sheet.getRange('D5:E34').clearContent();
   const lastRow = sheet.getLastRow();
   if (lastRow >= 5) sheet.getRange(5, 6, Math.max(1, lastRow - 4), 8).clearContent(); // F5〜M
 
@@ -42,7 +42,7 @@ function generateFortuneProStoryAndRows() {
   const postsCount = executeStep2(sheet, apiKey, method, storyText);
 
   SpreadsheetApp.getUi().alert(
-    `完了：D5:E14に設計、F5:M${postsCount + 4} に ${postsCount} 本のストーリー＋IGキャプションを出力しました。`
+    `完了：D5:E34に設計、F5:M${postsCount + 4} に ${postsCount} 本のストーリー＋IGキャプションを出力しました。`
   );
 }
 
@@ -59,12 +59,12 @@ function generateStep1Only() {
   if (!method) { SpreadsheetApp.getUi().alert('A3 に占い手法を入力してください。'); return; }
 
   // STEP1出力エリアのみクリア
-  sheet.getRange('D5:E14').clearContent();
+  sheet.getRange('D5:E34').clearContent();
 
   // STEP1実行
   executeStep1(sheet, apiKey, theme, method);
 
-  SpreadsheetApp.getUi().alert('STEP1完了：D5:E14 にストーリー設計を出力しました。');
+  SpreadsheetApp.getUi().alert('STEP1完了：D5:E34 にストーリー設計を出力しました。');
 }
 
 /* ===== STEP2のみ実行 ===== */
@@ -80,7 +80,7 @@ function generateStep2Only() {
   // STEP1の出力を取得
   const storyText = String(sheet.getRange('D5').getValue() || '').trim();
   if (!storyText) {
-    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。D5:E14 にストーリー設計が必要です。');
+    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。D5:E34 にストーリー設計が必要です。');
     return;
   }
 
@@ -98,7 +98,7 @@ function generateStep2Only() {
 
 /* ===== STEP1実行（共通処理） ===== */
 function executeStep1(sheet, apiKey, theme, method) {
-  // B5:B14からプロンプト取得、空なら初期化
+  // B5:B34からプロンプト取得、空なら初期化
   let promptStory = String(sheet.getRange('B5').getValue() || '').trim();
   if (!promptStory) {
     promptStory = getStoryDesignPrompt(theme, method);
@@ -112,7 +112,7 @@ function executeStep1(sheet, apiKey, theme, method) {
   const storyText = callGPT5(apiKey, promptStory);
   const endTime = new Date();
 
-  // D5:E14に出力
+  // D5:E34に出力
   sheet.getRange('D5').setValue(storyText);
 
   // ログ出力
@@ -123,7 +123,7 @@ function executeStep1(sheet, apiKey, theme, method) {
 
 /* ===== STEP2実行（共通処理） ===== */
 function executeStep2(sheet, apiKey, method, storyText) {
-  // C5:C14からプロンプト取得、空なら初期化
+  // C5:C34からプロンプト取得、空なら初期化
   let promptRows = String(sheet.getRange('C5').getValue() || '').trim();
   if (!promptRows) {
     promptRows = getRowsGenerationPrompt(method, storyText);
@@ -258,17 +258,17 @@ function initializeSheet() {
   sheet.getRange('D4').setValue('▼ STEP1出力本文');
   sheet.getRange('F4').setValue('▼ STEP2出力');
 
-  // デフォルトプロンプトを配置（5行目から縦10行結合）
+  // デフォルトプロンプトを配置（5行目から縦30行結合）
   const defaultPrompt1 = getStoryDesignPrompt('{{theme}}', '{{method}}');
   sheet.getRange('B5').setValue(defaultPrompt1);
-  sheet.getRange('B5:B14').merge();
+  sheet.getRange('B5:B34').merge();
 
   const defaultPrompt2 = getRowsGenerationPrompt('{{method}}', '{{storyText}}');
   sheet.getRange('C5').setValue(defaultPrompt2);
-  sheet.getRange('C5:C14').merge();
+  sheet.getRange('C5:C34').merge();
 
-  // STEP1出力エリアを結合（D5:E14）
-  sheet.getRange('D5:E14').merge();
+  // STEP1出力エリアを結合（D5:E34）
+  sheet.getRange('D5:E34').merge();
 
   // フォーマット適用
   formatSheet(sheet);
@@ -295,16 +295,16 @@ function formatSheet(sheet) {
   // 入力エリア（A2:A3）
   sheet.getRange('A2:A3').setBackground('#fff2cc');
 
-  // プロンプトエリア（B5:B14, C5:C14）
-  sheet.getRange('B5:B14').setBackground('#d9ead3')
+  // プロンプトエリア（B5:B34, C5:C34）
+  sheet.getRange('B5:B34').setBackground('#d9ead3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
-  sheet.getRange('C5:C14').setBackground('#d9ead3')
+  sheet.getRange('C5:C34').setBackground('#d9ead3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
-  // STEP1出力（D5:E14）
-  sheet.getRange('D5:E14').setBackground('#cfe2f3')
+  // STEP1出力（D5:E34）
+  sheet.getRange('D5:E34').setBackground('#cfe2f3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
@@ -328,7 +328,7 @@ function formatSheet(sheet) {
   // 行の高さ調整
   sheet.setRowHeight(1, 40);  // ヘッダー行
   sheet.setRowHeight(4, 35);  // サブヘッダー行
-  sheet.setRowHeights(5, 10, 60); // 5-14行目（結合セル用）
+  sheet.setRowHeights(5, 30, 60); // 5-34行目（結合セル用）
 }
 
 /* ========================================
@@ -345,8 +345,8 @@ function generate12ZodiacContent() {
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にテーマを入力してください（例：恋愛）'); return; }
 
-  // 既存出力クリア（D5:D14, E5:Q以降）
-  sheet.getRange('D5:D14').clearContent();
+  // 既存出力クリア（D5:D34, E5:Q以降）
+  sheet.getRange('D5:D34').clearContent();
   const lastRow = sheet.getLastRow();
   if (lastRow >= 5) {
     // E列（5）からQ列（17）までクリア
@@ -373,12 +373,12 @@ function generate12ZodiacStep1Only() {
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にテーマを入力してください（例：恋愛）'); return; }
 
   // STEP1出力エリアのみクリア
-  sheet.getRange('D5:D14').clearContent();
+  sheet.getRange('D5:D34').clearContent();
 
   // STEP1実行
   execute12ZodiacStep1(sheet, apiKey, theme);
 
-  SpreadsheetApp.getUi().alert('STEP1完了：D5:D14 にサブテーマ一覧を出力しました。');
+  SpreadsheetApp.getUi().alert('STEP1完了：D5:D34 にサブテーマ一覧を出力しました。');
 }
 
 /* ===== STEP2のみ実行 ===== */
@@ -394,7 +394,7 @@ function generate12ZodiacStep2Only() {
   // STEP1の出力を取得
   const subThemes = String(sheet.getRange('D5').getValue() || '').trim();
   if (!subThemes) {
-    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。D5:D14 にサブテーマ一覧が必要です。');
+    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。D5:D34 にサブテーマ一覧が必要です。');
     return;
   }
 
@@ -413,7 +413,7 @@ function generate12ZodiacStep2Only() {
 
 /* ===== STEP1実行（共通処理） ===== */
 function execute12ZodiacStep1(sheet, apiKey, theme) {
-  // B5:B14からプロンプト取得、空なら初期化
+  // B5:B34からプロンプト取得、空なら初期化
   let promptThemes = String(sheet.getRange('B5').getValue() || '').trim();
   if (!promptThemes) {
     promptThemes = getZodiacThemesPrompt(theme);
@@ -427,7 +427,7 @@ function execute12ZodiacStep1(sheet, apiKey, theme) {
   const subThemes = callGPT5(apiKey, promptThemes);
   const endTime = new Date();
 
-  // D5:D14に出力
+  // D5:D34に出力
   sheet.getRange('D5').setValue(subThemes);
 
   // ログ出力
@@ -438,7 +438,7 @@ function execute12ZodiacStep1(sheet, apiKey, theme) {
 
 /* ===== STEP2実行（共通処理） ===== */
 function execute12ZodiacStep2(sheet, apiKey, theme, subThemes) {
-  // C5:C14からプロンプト取得、空なら初期化
+  // C5:C34からプロンプト取得、空なら初期化
   let promptContents = String(sheet.getRange('C5').getValue() || '').trim();
   if (!promptContents) {
     promptContents = getZodiacContentsPrompt(theme, subThemes);
@@ -568,17 +568,17 @@ function initialize12ZodiacSheet() {
   sheet.getRange('P4').setValue('水瓶座');
   sheet.getRange('Q4').setValue('魚　座');
 
-  // デフォルトプロンプトを配置（5行目から縦10行結合）
+  // デフォルトプロンプトを配置（5行目から縦30行結合）
   const defaultPrompt1 = getZodiacThemesPrompt('{{theme}}');
   sheet.getRange('B5').setValue(defaultPrompt1);
-  sheet.getRange('B5:B14').merge();
+  sheet.getRange('B5:B34').merge();
 
   const defaultPrompt2 = getZodiacContentsPrompt('{{theme}}', '{{subThemes}}');
   sheet.getRange('C5').setValue(defaultPrompt2);
-  sheet.getRange('C5:C14').merge();
+  sheet.getRange('C5:C34').merge();
 
-  // STEP1出力エリアを結合（D5:D14）
-  sheet.getRange('D5:D14').merge();
+  // STEP1出力エリアを結合（D5:D34）
+  sheet.getRange('D5:D34').merge();
 
   // フォーマット適用
   format12ZodiacSheet(sheet);
@@ -612,16 +612,16 @@ function format12ZodiacSheet(sheet) {
   // 入力エリア（A2）
   sheet.getRange('A2').setBackground('#fff2cc');
 
-  // プロンプトエリア（B5:B14, C5:C14）
-  sheet.getRange('B5:B14').setBackground('#d9ead3')
+  // プロンプトエリア（B5:B34, C5:C34）
+  sheet.getRange('B5:B34').setBackground('#d9ead3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
-  sheet.getRange('C5:C14').setBackground('#d9ead3')
+  sheet.getRange('C5:C34').setBackground('#d9ead3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
-  // STEP1出力（D5:D14）
-  sheet.getRange('D5:D14').setBackground('#cfe2f3')
+  // STEP1出力（D5:D34）
+  sheet.getRange('D5:D34').setBackground('#cfe2f3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
@@ -646,5 +646,5 @@ function format12ZodiacSheet(sheet) {
   sheet.setRowHeight(1, 40);  // ヘッダー行
   sheet.setRowHeight(3, 35);  // サブヘッダー行
   sheet.setRowHeight(4, 30);  // 列ヘッダー行
-  sheet.setRowHeights(5, 10, 60); // 5-14行目（結合セル用）
+  sheet.setRowHeights(5, 30, 60); // 5-34行目（結合セル用）
 }
