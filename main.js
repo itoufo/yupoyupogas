@@ -204,7 +204,6 @@ function parsePostsObjectsWithCaption(text) {
 
 /* ===== ログ出力（7分割：N列〜P列、12星座：R列〜T列） ===== */
 function addLog(sheet, stepName, request, response, startTime, endTime) {
-  const logRow = sheet.getLastRow() + 1;
   const duration = ((endTime - startTime) / 1000).toFixed(2);
 
   const timestamp = Utilities.formatDate(startTime, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss');
@@ -213,6 +212,20 @@ function addLog(sheet, stepName, request, response, startTime, endTime) {
 
   // 12星座機能の場合はR列（18列目）から、それ以外はN列（14列目）から
   const logColumn = stepName.includes('12星座') ? 18 : 14;
+
+  // 36行目以降でログエリアの最後の行を探す（35行目はヘッダー）
+  let logRow = 36;
+  const maxRows = sheet.getMaxRows();
+
+  // ログ列で最後の空でない行を探す
+  for (let i = 36; i <= maxRows; i++) {
+    const cellValue = sheet.getRange(i, logColumn).getValue();
+    if (!cellValue || cellValue === '') {
+      logRow = i;
+      break;
+    }
+  }
+
   sheet.getRange(logRow, logColumn, 1, 3).setValues([[timestamp, requestSummary, responseSummary]]);
 }
 
@@ -244,9 +257,11 @@ function initializeSheet() {
   sheet.getRange('K1').setValue('L3A');
   sheet.getRange('L1').setValue('L3B');
   sheet.getRange('M1').setValue('IGキャプション');
-  sheet.getRange('N1').setValue('📊 実行ログ');
-  sheet.getRange('O1').setValue('リクエスト');
-  sheet.getRange('P1').setValue('レスポンス');
+
+  // ログヘッダー（35行目）
+  sheet.getRange('N35').setValue('📊 実行ログ');
+  sheet.getRange('O35').setValue('リクエスト');
+  sheet.getRange('P35').setValue('レスポンス');
 
   // 入力エリア（2-3行目）
   sheet.getRange('A2').setValue('テーマを入力');
@@ -311,8 +326,14 @@ function formatSheet(sheet) {
   // STEP2出力（F5:M以降）
   sheet.getRange('F5:M').setBackground('#f4cccc').setWrap(true);
 
-  // ログエリア（N列以降）
-  sheet.getRange('N:P').setBackground('#ead1dc').setWrap(true);
+  // ログヘッダー行（35行目）
+  sheet.getRange('N35:P35').setFontWeight('bold')
+                           .setBackground('#c27ba0')
+                           .setFontColor('#ffffff')
+                           .setHorizontalAlignment('center');
+
+  // ログエリア（36行目以降）
+  sheet.getRange('N36:P').setBackground('#ead1dc').setWrap(true);
 
   // 列幅調整
   sheet.setColumnWidth(1, 150);  // A列（入力）
@@ -329,6 +350,7 @@ function formatSheet(sheet) {
   sheet.setRowHeight(1, 40);  // ヘッダー行
   sheet.setRowHeight(4, 35);  // サブヘッダー行
   sheet.setRowHeights(5, 30, 60); // 5-34行目（結合セル用）
+  sheet.setRowHeight(35, 35); // ログヘッダー行
 }
 
 /* ========================================
@@ -540,9 +562,11 @@ function initialize12ZodiacSheet() {
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
   sheet.getRange('D1').setValue('✨ STEP1出力');
   sheet.getRange('E1:Q1').merge().setValue('💫 STEP2出力');
-  sheet.getRange('R1').setValue('📊 実行ログ');
-  sheet.getRange('S1').setValue('リクエスト');
-  sheet.getRange('T1').setValue('レスポンス');
+
+  // ログヘッダー（35行目）
+  sheet.getRange('R35').setValue('📊 実行ログ');
+  sheet.getRange('S35').setValue('リクエスト');
+  sheet.getRange('T35').setValue('レスポンス');
 
   // 入力エリア（2行目）
   sheet.getRange('A2').setValue('テーマを入力（例：恋愛）');
@@ -628,8 +652,14 @@ function format12ZodiacSheet(sheet) {
   // STEP2出力（E5:Q以降）
   sheet.getRange('E:Q').setBackground('#d9d2e9').setWrap(true);
 
-  // ログエリア（R列以降）
-  sheet.getRange('R:T').setBackground('#ead1dc').setWrap(true);
+  // ログヘッダー行（35行目）
+  sheet.getRange('R35:T35').setFontWeight('bold')
+                           .setBackground('#c27ba0')
+                           .setFontColor('#ffffff')
+                           .setHorizontalAlignment('center');
+
+  // ログエリア（36行目以降）
+  sheet.getRange('R36:T').setBackground('#ead1dc').setWrap(true);
 
   // 列幅調整
   sheet.setColumnWidth(1, 180);  // A列（入力）
@@ -647,4 +677,5 @@ function format12ZodiacSheet(sheet) {
   sheet.setRowHeight(3, 35);  // サブヘッダー行
   sheet.setRowHeight(4, 30);  // 列ヘッダー行
   sheet.setRowHeights(5, 30, 60); // 5-34行目（結合セル用）
+  sheet.setRowHeight(35, 35); // ログヘッダー行
 }
