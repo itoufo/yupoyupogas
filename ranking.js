@@ -175,18 +175,36 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
          .setHorizontalAlignment('center');
     currentRow++;
 
-    // 内容行（組み合わせ＋説明）
-    const contentData = [];
+    // 組み合わせ行
+    const combinationData = [];
     for (let i = 0; i < 10; i++) {
       const rankIndex = blockIndex * 10 + i;
       if (rankIndex < parsedData.rankings.length) {
         const item = parsedData.rankings[rankIndex];
-        contentData.push(`${item.combination}\n${item.description}`);
+        combinationData.push(item.combination);
       } else {
-        contentData.push('');
+        combinationData.push('');
       }
     }
-    sheet.getRange(currentRow, 6, 1, 10).setValues([contentData])
+    sheet.getRange(currentRow, 6, 1, 10).setValues([combinationData])
+         .setWrap(true)
+         .setVerticalAlignment('middle')
+         .setHorizontalAlignment('center')
+         .setFontWeight('bold');
+    currentRow++;
+
+    // 説明行
+    const descriptionData = [];
+    for (let i = 0; i < 10; i++) {
+      const rankIndex = blockIndex * 10 + i;
+      if (rankIndex < parsedData.rankings.length) {
+        const item = parsedData.rankings[rankIndex];
+        descriptionData.push(item.description);
+      } else {
+        descriptionData.push('');
+      }
+    }
+    sheet.getRange(currentRow, 6, 1, 10).setValues([descriptionData])
          .setWrap(true)
          .setVerticalAlignment('top')
          .setHorizontalAlignment('center');
@@ -201,7 +219,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
   const verticalStartCol = 19; // S列
 
   // 縦並びタイトル
-  sheet.getRange(currentRow, verticalStartCol, 1, 6).merge()
+  sheet.getRange(currentRow, verticalStartCol, 1, 9).merge()
        .setValue('【縦並びレイアウト】')
        .setFontWeight('bold')
        .setBackground('#93c47d')
@@ -212,7 +230,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
   // 3つのブロックに分けて出力（縦に10行ずつ）
   for (let blockIndex = 0; blockIndex < 3; blockIndex++) {
     const startRank = blockIndex * 10 + 1;
-    const baseCol = verticalStartCol + (blockIndex * 2); // S列、U列、W列
+    const baseCol = verticalStartCol + (blockIndex * 3); // S列、V列、Y列
 
     // 10行分のデータを縦に出力
     for (let i = 0; i < 10; i++) {
@@ -230,9 +248,17 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
              .setHorizontalAlignment('center')
              .setVerticalAlignment('middle');
 
-        // 内容列
+        // 組み合わせ列
         sheet.getRange(currentRow + i, baseCol + 1)
-             .setValue(`${item.combination}\n${item.description}`)
+             .setValue(item.combination)
+             .setWrap(true)
+             .setVerticalAlignment('middle')
+             .setHorizontalAlignment('center')
+             .setFontWeight('bold');
+
+        // 説明列
+        sheet.getRange(currentRow + i, baseCol + 2)
+             .setValue(item.description)
              .setWrap(true)
              .setVerticalAlignment('top');
       }
@@ -244,7 +270,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
   currentRow++;
 
   // キャプション出力（横並びエリアの下）
-  const captionRow = 5 + 1 + 2 * 3 + 3; // タイトル + (ヘッダー+内容)*3 + 空行*3
+  const captionRow = 5 + 1 + 3 * 3 + 3; // タイトル + (ヘッダー+組み合わせ+説明)*3 + 空行*3 = 18
   sheet.getRange(captionRow, 6, 1, 10).merge()
        .setValue('【Instagramキャプション】')
        .setFontWeight('bold')
@@ -281,12 +307,12 @@ function initializeRankingSheet() {
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
   sheet.getRange('D1').setValue('✨ STEP1出力');
   sheet.getRange('F1:O1').merge().setValue('🏆 STEP2出力（横並び）');
-  sheet.getRange('S1:X1').merge().setValue('🏆 STEP2出力（縦並び）');
+  sheet.getRange('S1:AA1').merge().setValue('🏆 STEP2出力（縦並び）');
 
   // ログヘッダー（35行目）
-  sheet.getRange('Y35').setValue('📊 実行ログ');
-  sheet.getRange('Z35').setValue('リクエスト');
-  sheet.getRange('AA35').setValue('レスポンス');
+  sheet.getRange('AB35').setValue('📊 実行ログ');
+  sheet.getRange('AC35').setValue('リクエスト');
+  sheet.getRange('AD35').setValue('レスポンス');
 
   // 入力エリア（2-3行目）
   sheet.getRange('A2').setValue('ランキングテーマを入力（例：2025年の恋愛運）');
@@ -304,7 +330,7 @@ function initializeRankingSheet() {
   sheet.getRange('C4').setValue('▼ STEP2プロンプト本文');
   sheet.getRange('D4').setValue('▼ STEP1出力本文');
   sheet.getRange('F4:O4').merge().setValue('▼ STEP2出力（横並び）');
-  sheet.getRange('S4:X4').merge().setValue('▼ STEP2出力（縦並び）');
+  sheet.getRange('S4:AA4').merge().setValue('▼ STEP2出力（縦並び）');
 
   // デフォルトプロンプトを配置（5行目から縦30行結合）
   const defaultPrompt1 = getRankingDesignPrompt('{{theme}}', '{{type}}');
@@ -327,14 +353,14 @@ function initializeRankingSheet() {
 /* ===== ランキングシートフォーマッティング ===== */
 function formatRankingSheet(sheet) {
   // ヘッダー行（1行目）をボールド＋背景色
-  const headerRange = sheet.getRange('A1:AA1');
+  const headerRange = sheet.getRange('A1:AD1');
   headerRange.setFontWeight('bold')
              .setBackground('#e69138')
              .setFontColor('#ffffff')
              .setHorizontalAlignment('center');
 
   // サブヘッダー行（4行目）をボールド＋背景色
-  const subHeaderRange = sheet.getRange('A4:AA4');
+  const subHeaderRange = sheet.getRange('A4:AD4');
   subHeaderRange.setFontWeight('bold')
                 .setBackground('#f6b26b')
                 .setFontColor('#ffffff')
@@ -359,17 +385,17 @@ function formatRankingSheet(sheet) {
   // STEP2出力（F5:O以降）- 横並び10列
   sheet.getRange('F:O').setBackground('#fce5cd').setWrap(true);
 
-  // STEP2出力（S5:X以降）- 縦並び6列
-  sheet.getRange('S:X').setBackground('#d9d2e9').setWrap(true);
+  // STEP2出力（S5:AA以降）- 縦並び9列
+  sheet.getRange('S:AA').setBackground('#d9d2e9').setWrap(true);
 
   // ログヘッダー行（35行目）
-  sheet.getRange('Y35:AA35').setFontWeight('bold')
+  sheet.getRange('AB35:AD35').setFontWeight('bold')
                            .setBackground('#c27ba0')
                            .setFontColor('#ffffff')
                            .setHorizontalAlignment('center');
 
   // ログエリア（36行目以降）
-  sheet.getRange('Y36:AA').setBackground('#ead1dc').setWrap(true);
+  sheet.getRange('AB36:AD').setBackground('#ead1dc').setWrap(true);
 
   // 列幅調整
   sheet.setColumnWidth(1, 200);  // A列（入力）
@@ -382,17 +408,20 @@ function formatRankingSheet(sheet) {
   sheet.setColumnWidth(16, 50);  // P列（空白）
   sheet.setColumnWidth(17, 50);  // Q列（空白）
   sheet.setColumnWidth(18, 50);  // R列（空白）
-  // S〜X列（縦並びランキング）
-  sheet.setColumnWidth(19, 60);  // S列（順位）
-  sheet.setColumnWidth(20, 200); // T列（内容）
-  sheet.setColumnWidth(21, 60);  // U列（順位）
-  sheet.setColumnWidth(22, 200); // V列（内容）
-  sheet.setColumnWidth(23, 60);  // W列（順位）
-  sheet.setColumnWidth(24, 200); // X列（内容）
+  // S〜AA列（縦並びランキング：順位、組み合わせ、説明 × 3グループ）
+  sheet.setColumnWidth(19, 60);  // S列（1位〜10位：順位）
+  sheet.setColumnWidth(20, 150); // T列（1位〜10位：組み合わせ）
+  sheet.setColumnWidth(21, 200); // U列（1位〜10位：説明）
+  sheet.setColumnWidth(22, 60);  // V列（11位〜20位：順位）
+  sheet.setColumnWidth(23, 150); // W列（11位〜20位：組み合わせ）
+  sheet.setColumnWidth(24, 200); // X列（11位〜20位：説明）
+  sheet.setColumnWidth(25, 60);  // Y列（21位〜30位：順位）
+  sheet.setColumnWidth(26, 150); // Z列（21位〜30位：組み合わせ）
+  sheet.setColumnWidth(27, 200); // AA列（21位〜30位：説明）
   // ログ列
-  sheet.setColumnWidth(25, 150); // Y列（タイムスタンプ）
-  sheet.setColumnWidth(26, 350); // Z列（リクエスト）
-  sheet.setColumnWidth(27, 350); // AA列（レスポンス）
+  sheet.setColumnWidth(28, 150); // AB列（タイムスタンプ）
+  sheet.setColumnWidth(29, 350); // AC列（リクエスト）
+  sheet.setColumnWidth(30, 350); // AD列（レスポンス）
 
   // 行の高さ調整
   sheet.setRowHeight(1, 40);  // ヘッダー行
