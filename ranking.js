@@ -171,6 +171,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
     }
     sheet.getRange(currentRow, 6, 1, 10).setValues([headerData])
          .setFontWeight('bold')
+         .setFontSize(22)
          .setBackground('#ffd966')
          .setHorizontalAlignment('center');
     currentRow++;
@@ -190,7 +191,8 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
          .setWrap(true)
          .setVerticalAlignment('middle')
          .setHorizontalAlignment('center')
-         .setFontWeight('bold');
+         .setFontWeight('bold')
+         .setFontSize(22);
     currentRow++;
 
     // 説明行
@@ -207,7 +209,8 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
     sheet.getRange(currentRow, 6, 1, 10).setValues([descriptionData])
          .setWrap(true)
          .setVerticalAlignment('top')
-         .setHorizontalAlignment('center');
+         .setHorizontalAlignment('center')
+         .setFontSize(16);
     currentRow++;
 
     // ブロック間の空行
@@ -244,6 +247,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
         sheet.getRange(currentRow + i, baseCol)
              .setValue(`${rank}位`)
              .setFontWeight('bold')
+             .setFontSize(22)
              .setBackground('#ffd966')
              .setHorizontalAlignment('center')
              .setVerticalAlignment('middle');
@@ -254,13 +258,15 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
              .setWrap(true)
              .setVerticalAlignment('middle')
              .setHorizontalAlignment('center')
-             .setFontWeight('bold');
+             .setFontWeight('bold')
+             .setFontSize(22);
 
         // 説明列
         sheet.getRange(currentRow + i, baseCol + 2)
              .setValue(item.description)
              .setWrap(true)
-             .setVerticalAlignment('top');
+             .setVerticalAlignment('top')
+             .setFontSize(16);
       }
     }
   }
