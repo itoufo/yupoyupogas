@@ -5,8 +5,8 @@
 /* ===== まとめて実行（STEP1+2） ===== */
 function generate12ZodiacContent() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -32,8 +32,8 @@ function generate12ZodiacContent() {
 /* ===== STEP1のみ実行 ===== */
 function generate12ZodiacStep1Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -51,8 +51,8 @@ function generate12ZodiacStep1Only() {
 /* ===== STEP2のみ実行 ===== */
 function generate12ZodiacStep2Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -91,7 +91,7 @@ function execute12ZodiacStep1(sheet, apiKey, theme) {
   }
 
   const startTime = new Date();
-  const subThemes = callGPT5(apiKey, promptThemes);
+  const subThemes = callGemini(apiKey, promptThemes);
   const endTime = new Date();
 
   // D5:D34に出力
@@ -118,7 +118,7 @@ function execute12ZodiacStep2(sheet, apiKey, theme, subThemes) {
   }
 
   const startTime = new Date();
-  const contentsJson = callGPT5(apiKey, promptContents);
+  const contentsJson = callGemini(apiKey, promptContents);
   const endTime = new Date();
 
   const parsedData = parse12ZodiacContents(contentsJson);

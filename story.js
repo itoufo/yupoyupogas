@@ -5,8 +5,8 @@
 /* ===== まとめて実行（STEP1+2） ===== */
 function generateFortuneProStoryAndRows() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:手法）
   const theme  = String(sheet.getRange('A2').getValue() || '').trim();
@@ -33,8 +33,8 @@ function generateFortuneProStoryAndRows() {
 /* ===== STEP1のみ実行 ===== */
 function generateStep1Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:手法）
   const theme  = String(sheet.getRange('A2').getValue() || '').trim();
@@ -54,8 +54,8 @@ function generateStep1Only() {
 /* ===== STEP2のみ実行 ===== */
 function generateStep2Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A3:手法）
   const method = String(sheet.getRange('A3').getValue() || '').trim();
@@ -93,7 +93,7 @@ function executeStep1(sheet, apiKey, theme, method) {
   }
 
   const startTime = new Date();
-  const storyText = callGPT5(apiKey, promptStory);
+  const storyText = callGemini(apiKey, promptStory);
   const endTime = new Date();
 
   // D5:E34に出力
@@ -120,7 +120,7 @@ function executeStep2(sheet, apiKey, method, storyText) {
   }
 
   const startTime = new Date();
-  const rowsJson = callGPT5(apiKey, promptRows);
+  const rowsJson = callGemini(apiKey, promptRows);
   const endTime = new Date();
 
   const posts = parsePostsObjectsWithCaption(rowsJson);

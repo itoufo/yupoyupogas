@@ -5,8 +5,8 @@
 /* ===== まとめて実行（STEP1+2） ===== */
 function generateRankingContent() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:星座or誕生月）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -38,8 +38,8 @@ function generateRankingContent() {
 /* ===== STEP1のみ実行 ===== */
 function generateRankingStep1Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:星座or誕生月）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -63,8 +63,8 @@ function generateRankingStep1Only() {
 /* ===== STEP2のみ実行 ===== */
 function generateRankingStep2Only() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
-  if (!apiKey) throw new Error('OPENAI_API_KEY が設定されていません。');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:星座or誕生月）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
@@ -111,7 +111,7 @@ function executeRankingStep1(sheet, apiKey, theme, type) {
   }
 
   const startTime = new Date();
-  const designText = callGPT5(apiKey, promptDesign);
+  const designText = callGemini(apiKey, promptDesign);
   const endTime = new Date();
 
   // D5:E34に出力
@@ -139,7 +139,7 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
   }
 
   const startTime = new Date();
-  const rankingJson = callGPT5(apiKey, promptRanking);
+  const rankingJson = callGemini(apiKey, promptRanking);
   const endTime = new Date();
 
   const parsedData = parseRankingContents(rankingJson);
