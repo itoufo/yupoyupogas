@@ -273,7 +273,7 @@ function formatSheet(sheet) {
   sheet.setColumnWidth(1, 150);  // A列（入力）
   sheet.setColumnWidth(2, 450);  // B列（STEP1プロンプト）
   sheet.setColumnWidth(3, 450);  // C列（STEP2プロンプト）
-  sheet.setColumnWidth(4, 300);  // D列（IGキャプション）
+  sheet.setColumnWidth(4, 500);  // D列（IGキャプション - 長文対応）
   sheet.setColumnWidth(5, 300);  // E列（STEP1出力）
   sheet.setColumnWidth(6, 150);  // F列（STEP1出力結合用）
   sheet.setColumnWidths(7, 7, 130); // G-M列（STEP2出力）
