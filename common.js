@@ -93,7 +93,7 @@ function callGemini(apiKey, prompt) {
     ]
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
   const options = {
     method: 'post',
     contentType: 'application/json',
