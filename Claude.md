@@ -3,7 +3,7 @@
 ## プロジェクト概要
 
 Google Apps Script (GAS) を使用した、Instagram投稿用の占いコンテンツ自動生成ツールです。
-OpenAI Gemini-5 APIを活用し、複数の占いフォーマットに対応しています。
+Google Gemini API（モデル: gemini-2.5-flash-lite）を活用し、複数の占いフォーマットに対応しています。
 
 ## ファイル構成
 

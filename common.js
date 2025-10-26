@@ -116,12 +116,13 @@ function addLog(sheet, stepName, request, response, startTime, endTime) {
   // 機能ごとにログ列を変更（ランキング：AB列（28列目）、12星座：R列（18列目）、7分割：N列（14列目））
   const logColumn = stepName.includes('ランキング') ? 28 : stepName.includes('12星座') ? 18 : 14;
 
-  // 36行目以降でログエリアの最後の行を探す（35行目はヘッダー）
-  let logRow = 36;
+  // 機能ごとにログ開始行を変更（7分割：51行目、その他：36行目）
+  const logStartRow = (stepName.includes('STEP1') || stepName.includes('STEP2')) ? 51 : 36;
+  let logRow = logStartRow;
   const maxRows = sheet.getMaxRows();
 
   // ログ列で最後の空でない行を探す
-  for (let i = 36; i <= maxRows; i++) {
+  for (let i = logStartRow; i <= maxRows; i++) {
     const cellValue = sheet.getRange(i, logColumn).getValue();
     if (!cellValue || cellValue === '') {
       logRow = i;
@@ -141,16 +142,18 @@ function parsePostsObjectsWithCaption(text) {
   try {
     const obj = JSON.parse(cleaned);
     if (!obj || !Array.isArray(obj.posts)) return null;
-    return obj.posts.map(p => ({
-      title:      String(p.title || ''),
-      l1a:        String(p.l1a || ''),
-      l1b:        String(p.l1b || ''),
-      l2a:        String(p.l2a || ''),
-      l2b:        String(p.l2b || ''),
-      l3a:        String(p.l3a || ''),
-      l3b:        String(p.l3b || ''),
-      ig_caption: String(p.ig_caption || '')
-    }));
+    return {
+      posts: obj.posts.map(p => ({
+        title: String(p.title || ''),
+        l1a:   String(p.l1a || ''),
+        l1b:   String(p.l1b || ''),
+        l2a:   String(p.l2a || ''),
+        l2b:   String(p.l2b || ''),
+        l3a:   String(p.l3a || ''),
+        l3b:   String(p.l3b || '')
+      })),
+      instagram_caption: String(obj.instagram_caption || '')
+    };
   } catch {
     return null;
   }

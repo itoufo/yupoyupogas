@@ -14,10 +14,11 @@ function generateFortuneProStoryAndRows() {
   if (!theme)  { SpreadsheetApp.getUi().alert('A2 にテーマを入力してください。'); return; }
   if (!method) { SpreadsheetApp.getUi().alert('A3 に占い手法を入力してください。'); return; }
 
-  // 既存出力クリア（D5:E34, F5:M以降、ログは残す）
-  sheet.getRange('D5:E34').clearContent();
+  // 既存出力クリア（D5:D34, E5:F34, G5以降、ログは残す）
+  sheet.getRange('D5:D34').clearContent();
+  sheet.getRange('E5:F34').clearContent();
   const lastRow = sheet.getLastRow();
-  if (lastRow >= 5) sheet.getRange(5, 6, Math.max(1, lastRow - 4), 8).clearContent(); // F5〜M
+  if (lastRow >= 5) sheet.getRange(5, 7, Math.max(1, lastRow - 4), 7).clearContent(); // G5〜M
 
   // STEP1実行
   const storyText = executeStep1(sheet, apiKey, theme, method);
@@ -26,7 +27,7 @@ function generateFortuneProStoryAndRows() {
   const postsCount = executeStep2(sheet, apiKey, method, storyText);
 
   SpreadsheetApp.getUi().alert(
-    `完了：D5:E34に設計、F5:M${postsCount + 4} に ${postsCount} 本のストーリー＋IGキャプションを出力しました。`
+    `完了：E5:F34に設計、D5:D34にIGキャプション、G5:M${postsCount + 4} に ${postsCount} 本のストーリーを出力しました。`
   );
 }
 
@@ -43,12 +44,12 @@ function generateStep1Only() {
   if (!method) { SpreadsheetApp.getUi().alert('A3 に占い手法を入力してください。'); return; }
 
   // STEP1出力エリアのみクリア
-  sheet.getRange('D5:E34').clearContent();
+  sheet.getRange('E5:F34').clearContent();
 
   // STEP1実行
   executeStep1(sheet, apiKey, theme, method);
 
-  SpreadsheetApp.getUi().alert('STEP1完了：D5:E34 にストーリー設計を出力しました。');
+  SpreadsheetApp.getUi().alert('STEP1完了：E5:F34 にストーリー設計を出力しました。');
 }
 
 /* ===== STEP2のみ実行 ===== */
@@ -62,21 +63,22 @@ function generateStep2Only() {
   if (!method) { SpreadsheetApp.getUi().alert('A3 に占い手法を入力してください。'); return; }
 
   // STEP1の出力を取得
-  const storyText = String(sheet.getRange('D5').getValue() || '').trim();
+  const storyText = String(sheet.getRange('E5').getValue() || '').trim();
   if (!storyText) {
-    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。D5:E34 にストーリー設計が必要です。');
+    SpreadsheetApp.getUi().alert('先にSTEP1を実行してください。E5:F34 にストーリー設計が必要です。');
     return;
   }
 
-  // STEP2出力エリアのみクリア
+  // STEP2出力エリアのみクリア（D5:D34とG5以降）
+  sheet.getRange('D5:D34').clearContent();
   const lastRow = sheet.getLastRow();
-  if (lastRow >= 5) sheet.getRange(5, 6, Math.max(1, lastRow - 4), 8).clearContent();
+  if (lastRow >= 5) sheet.getRange(5, 7, Math.max(1, lastRow - 4), 7).clearContent();
 
   // STEP2実行
   const postsCount = executeStep2(sheet, apiKey, method, storyText);
 
   SpreadsheetApp.getUi().alert(
-    `STEP2完了：F5:M${postsCount + 4} に ${postsCount} 本のストーリー＋IGキャプションを出力しました。`
+    `STEP2完了：D5:D34にIGキャプション、G5:M${postsCount + 4} に ${postsCount} 本のストーリーを出力しました。`
   );
 }
 
@@ -96,8 +98,8 @@ function executeStep1(sheet, apiKey, theme, method) {
   const storyText = callGemini(apiKey, promptStory);
   const endTime = new Date();
 
-  // D5:E34に出力
-  sheet.getRange('D5').setValue(storyText);
+  // E5:F34に出力
+  sheet.getRange('E5').setValue(storyText);
 
   // ログ出力
   addLog(sheet, 'STEP1: ストーリー設計', promptStory, storyText, startTime, endTime);
@@ -123,24 +125,26 @@ function executeStep2(sheet, apiKey, method, storyText) {
   const rowsJson = callGemini(apiKey, promptRows);
   const endTime = new Date();
 
-  const posts = parsePostsObjectsWithCaption(rowsJson);
-  if (!posts || posts.length === 0) {
+  const parsedData = parsePostsObjectsWithCaption(rowsJson);
+  if (!parsedData || !parsedData.posts || parsedData.posts.length === 0) {
     SpreadsheetApp.getUi().alert('投稿生成に失敗しました。');
     return 0;
   }
 
-  // F5〜M = 8列（title, l1a, l1b, l2a, l2b, l3a, l3b, ig_caption）
-  const values = posts.map(p => [
+  // D5:D34にInstagramキャプションを出力
+  sheet.getRange('D5').setValue(parsedData.instagram_caption);
+
+  // G5〜 = 7列（title, l1a, l1b, l2a, l2b, l3a, l3b）
+  const values = parsedData.posts.map(p => [
     (p.title || '').trim(),
     (p.l1a || '').trim(),
     (p.l1b || '').trim(),
     (p.l2a || '').trim(),
     (p.l2b || '').trim(),
     (p.l3a || '').trim(),
-    (p.l3b || '').trim(),
-    (p.ig_caption || '').trim()
+    (p.l3b || '').trim()
   ]);
-  sheet.getRange(5, 6, values.length, 8).setValues(values);
+  sheet.getRange(5, 7, values.length, 7).setValues(values);
 
   // ログ出力
   addLog(sheet, 'STEP2: 7分割生成', promptRows, rowsJson, startTime, endTime);
@@ -167,20 +171,20 @@ function initializeSheet() {
   sheet.getRange('A1').setValue('📝 入力');
   sheet.getRange('B1').setValue('📋 STEP1プロンプト');
   sheet.getRange('C1').setValue('📋 STEP2プロンプト');
-  sheet.getRange('D1').setValue('✨ STEP1出力');
-  sheet.getRange('F1').setValue('タイトル');
-  sheet.getRange('G1').setValue('L1A');
-  sheet.getRange('H1').setValue('L1B');
-  sheet.getRange('I1').setValue('L2A');
-  sheet.getRange('J1').setValue('L2B');
-  sheet.getRange('K1').setValue('L3A');
-  sheet.getRange('L1').setValue('L3B');
-  sheet.getRange('M1').setValue('IGキャプション');
+  sheet.getRange('D1').setValue('📸 IGキャプション');
+  sheet.getRange('E1:F1').merge().setValue('✨ STEP1出力');
+  sheet.getRange('G1').setValue('タイトル');
+  sheet.getRange('H1').setValue('L1A');
+  sheet.getRange('I1').setValue('L1B');
+  sheet.getRange('J1').setValue('L2A');
+  sheet.getRange('K1').setValue('L2B');
+  sheet.getRange('L1').setValue('L3A');
+  sheet.getRange('M1').setValue('L3B');
 
-  // ログヘッダー（35行目）
-  sheet.getRange('N35').setValue('📊 実行ログ');
-  sheet.getRange('O35').setValue('リクエスト');
-  sheet.getRange('P35').setValue('レスポンス');
+  // ログヘッダー（50行目に移動）
+  sheet.getRange('N50').setValue('📊 実行ログ');
+  sheet.getRange('O50').setValue('リクエスト');
+  sheet.getRange('P50').setValue('レスポンス');
 
   // 入力エリア（2-3行目）
   sheet.getRange('A2').setValue('テーマを入力');
@@ -189,8 +193,9 @@ function initializeSheet() {
   // サブヘッダー（4行目）
   sheet.getRange('B4').setValue('▼ STEP1プロンプト本文');
   sheet.getRange('C4').setValue('▼ STEP2プロンプト本文');
-  sheet.getRange('D4').setValue('▼ STEP1出力本文');
-  sheet.getRange('F4').setValue('▼ STEP2出力');
+  sheet.getRange('D4').setValue('▼ IGキャプション');
+  sheet.getRange('E4:F4').merge().setValue('▼ STEP1出力本文');
+  sheet.getRange('G4').setValue('▼ STEP2出力');
 
   // デフォルトプロンプトを配置（5行目から縦30行結合）
   const defaultPrompt1 = getStoryDesignPrompt('{{theme}}', '{{method}}');
@@ -201,8 +206,11 @@ function initializeSheet() {
   sheet.getRange('C5').setValue(defaultPrompt2);
   sheet.getRange('C5:C34').merge();
 
-  // STEP1出力エリアを結合（D5:E34）
-  sheet.getRange('D5:E34').merge();
+  // IGキャプション出力エリアを結合（D5:D34）
+  sheet.getRange('D5:D34').merge();
+
+  // STEP1出力エリアを結合（E5:F34）
+  sheet.getRange('E5:F34').merge();
 
   // フォーマット適用
   formatSheet(sheet);
@@ -229,38 +237,46 @@ function formatSheet(sheet) {
   // 入力エリア（A2:A3）
   sheet.getRange('A2:A3').setBackground('#fff2cc');
 
-  // プロンプトエリア（B5:B34, C5:C34）
+  // プロンプトエリア（B5:B34, C5:C34）- overflow: hidden的な設定
   sheet.getRange('B5:B34').setBackground('#d9ead3')
-                          .setWrap(true)
-                          .setVerticalAlignment('top');
+                          .setWrap(false)
+                          .setVerticalAlignment('top')
+                          .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
   sheet.getRange('C5:C34').setBackground('#d9ead3')
+                          .setWrap(false)
+                          .setVerticalAlignment('top')
+                          .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+
+  // IGキャプション出力（D5:D34）
+  sheet.getRange('D5:D34').setBackground('#fff2cc')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
-  // STEP1出力（D5:E34）
-  sheet.getRange('D5:E34').setBackground('#cfe2f3')
+  // STEP1出力（E5:F34）
+  sheet.getRange('E5:F34').setBackground('#cfe2f3')
                           .setWrap(true)
                           .setVerticalAlignment('top');
 
-  // STEP2出力（F5:M以降）
-  sheet.getRange('F5:M').setBackground('#f4cccc').setWrap(true);
+  // STEP2出力（G5:M以降）
+  sheet.getRange('G5:M').setBackground('#f4cccc').setWrap(true);
 
-  // ログヘッダー行（35行目）
-  sheet.getRange('N35:P35').setFontWeight('bold')
+  // ログヘッダー行（50行目）
+  sheet.getRange('N50:P50').setFontWeight('bold')
                            .setBackground('#c27ba0')
                            .setFontColor('#ffffff')
                            .setHorizontalAlignment('center');
 
-  // ログエリア（36行目以降）
-  sheet.getRange('N36:P').setBackground('#ead1dc').setWrap(true);
+  // ログエリア（51行目以降）
+  sheet.getRange('N51:P').setBackground('#ead1dc').setWrap(true);
 
   // 列幅調整
   sheet.setColumnWidth(1, 150);  // A列（入力）
   sheet.setColumnWidth(2, 450);  // B列（STEP1プロンプト）
   sheet.setColumnWidth(3, 450);  // C列（STEP2プロンプト）
-  sheet.setColumnWidth(4, 450);  // D列（STEP1出力）
-  sheet.setColumnWidth(5, 50);   // E列（結合用）
-  sheet.setColumnWidths(6, 8, 130); // F-M列（STEP2出力）
+  sheet.setColumnWidth(4, 300);  // D列（IGキャプション）
+  sheet.setColumnWidth(5, 300);  // E列（STEP1出力）
+  sheet.setColumnWidth(6, 150);  // F列（STEP1出力結合用）
+  sheet.setColumnWidths(7, 7, 130); // G-M列（STEP2出力）
   sheet.setColumnWidth(14, 150); // N列（タイムスタンプ）
   sheet.setColumnWidth(15, 350); // O列（リクエスト）
   sheet.setColumnWidth(16, 350); // P列（レスポンス）
@@ -269,5 +285,5 @@ function formatSheet(sheet) {
   sheet.setRowHeight(1, 40);  // ヘッダー行
   sheet.setRowHeight(4, 35);  // サブヘッダー行
   sheet.setRowHeights(5, 30, 60); // 5-34行目（結合セル用）
-  sheet.setRowHeight(35, 35); // ログヘッダー行
+  sheet.setRowHeight(50, 35); // ログヘッダー行
 }
