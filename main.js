@@ -34,5 +34,10 @@ function onOpen() {
       .addItem('今日の星座占いを生成（Gemini）', 'generateTodayHoroscope')
       .addSeparator()
       .addItem('シート初期化（ヘッダー配置）', 'initializeHoroscopeSheet'))
+    .addSeparator()
+    .addSubMenu(SpreadsheetApp.getUi().createMenu('🃏 タロット占い')
+      .addItem('タロット占いを生成（Gemini）', 'generateTarot')
+      .addSeparator()
+      .addItem('シート初期化（ヘッダー配置）', 'initializeTarotSheet'))
     .addToUi();
 }

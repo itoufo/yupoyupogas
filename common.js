@@ -215,3 +215,21 @@ function parseHoroscopeData(text) {
     return null;
   }
 }
+
+/* ===== JSONパース（タロット占い用） ===== */
+function parseTarotData(text) {
+  let cleaned = text.replace(/^```json|^```|```$/gmi, '').trim();
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first >= 0 && last > first) cleaned = cleaned.slice(first, last + 1);
+
+  try {
+    const obj = JSON.parse(cleaned);
+    if (!obj || !Array.isArray(obj.cards)) return null;
+    return {
+      cards: obj.cards
+    };
+  } catch {
+    return null;
+  }
+}
