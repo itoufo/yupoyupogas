@@ -105,6 +105,67 @@ function callGemini(apiKey, prompt) {
   return json.candidates[0].content.parts[0].text.trim();
 }
 
+/* ===== OpenAI DALL-E 3呼び出し ===== */
+function callDallE3(apiKey, prompt) {
+  const payload = {
+    model: 'dall-e-3',
+    prompt: prompt,
+    n: 1,
+    size: '1024x1792',  // タロットカードに適した縦長サイズ
+    quality: 'standard'
+  };
+
+  const url = 'https://api.openai.com/v1/images/generations';
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  const res = UrlFetchApp.fetch(url, options);
+  const json = JSON.parse(res.getContentText());
+
+  if (json.error) {
+    throw new Error(`OpenAI API Error: ${json.error.message}`);
+  }
+
+  return json.data[0].url;  // 画像URLを返す
+}
+
+/* ===== リトライ機能付きDALL-E 3呼び出し ===== */
+function callDallE3WithRetry(apiKey, prompt, maxRetries = 3) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      Logger.log(`DALL-E 3呼び出し（試行${attempt}/${maxRetries}）`);
+      const imageUrl = callDallE3(apiKey, prompt);
+
+      if (attempt > 1) {
+        Logger.log(`成功: ${attempt}回目の試行で画像生成に成功`);
+      }
+
+      return imageUrl;
+    } catch (error) {
+      lastError = error;
+      Logger.log(`エラー（試行${attempt}/${maxRetries}）: ${error.message}`);
+
+      if (attempt < maxRetries) {
+        const waitTime = attempt * 2000;  // 2秒、4秒、6秒...
+        Logger.log(`${waitTime / 1000}秒待機してリトライします...`);
+        Utilities.sleep(waitTime);
+      }
+    }
+  }
+
+  // 全リトライ失敗
+  throw new Error(`${maxRetries}回のリトライ後も失敗: ${lastError.message}`);
+}
+
 /* ===== ログ出力（7分割：N列〜P列、12星座：R列〜T列、ランキング：AB列〜AD列） ===== */
 function addLog(sheet, stepName, request, response, startTime, endTime) {
   const duration = ((endTime - startTime) / 1000).toFixed(2);
@@ -216,7 +277,7 @@ function parseHoroscopeData(text) {
   }
 }
 
-/* ===== JSONパース（タロット占い用） ===== */
+/* ===== JSONパース（タロット3択占い用） ===== */
 function parseTarotData(text) {
   let cleaned = text.replace(/^```json|^```|```$/gmi, '').trim();
   const first = cleaned.indexOf('{');
@@ -225,9 +286,32 @@ function parseTarotData(text) {
 
   try {
     const obj = JSON.parse(cleaned);
-    if (!obj || !Array.isArray(obj.cards)) return null;
+    if (!obj || !Array.isArray(obj.choices)) return null;
     return {
-      cards: obj.cards
+      theme: String(obj.theme || ''),
+      card_summary: String(obj.card_summary || ''),
+      choices: obj.choices,
+      overall_message: String(obj.overall_message || ''),
+      advice: String(obj.advice || ''),
+      instagram_caption: String(obj.instagram_caption || '')
+    };
+  } catch {
+    return null;
+  }
+}
+
+/* ===== JSONパース（ランキング名量産用） ===== */
+function parseRankingTitles(text) {
+  let cleaned = text.replace(/^```json|^```|```$/gmi, '').trim();
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first >= 0 && last > first) cleaned = cleaned.slice(first, last + 1);
+
+  try {
+    const obj = JSON.parse(cleaned);
+    if (!obj || !Array.isArray(obj.titles)) return null;
+    return {
+      titles: obj.titles
     };
   } catch {
     return null;

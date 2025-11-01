@@ -39,5 +39,16 @@ function onOpen() {
       .addItem('タロット占いを生成（Gemini）', 'generateTarot')
       .addSeparator()
       .addItem('シート初期化（ヘッダー配置）', 'initializeTarotSheet'))
+    .addSeparator()
+    .addSubMenu(SpreadsheetApp.getUi().createMenu('🎨 タロットカード画像生成')
+      .addItem('78枚の画像を一括生成（OpenAI DALL-E 3）', 'generateAllTarotImages')
+      .addSeparator()
+      .addItem('シート初期化（画像生成用）', 'initializeTarotImageSheet'))
+    .addSeparator()
+    .addSubMenu(SpreadsheetApp.getUi().createMenu('💡 ランキング名量産')
+      .addItem('ランキング名を50個生成（通常版）', 'generateRankingTitles')
+      .addItem('ランキング名を50個生成（ネガポジ寄り添い版）', 'generateRankingTitlesNegativeToPositive')
+      .addSeparator()
+      .addItem('シート初期化（ヘッダー配置）', 'initializeRankingTitlesSheet'))
     .addToUi();
 }
