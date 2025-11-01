@@ -357,16 +357,16 @@ function initializeRankingSheet() {
   sheet.getRange('A3').setValue('星座 or 誕生月を選択');
   sheet.getRange('A4').setValue('血液型 or 誕生月を選択');
 
-  // A3にドロップダウンを設定
+  // A3にドロップダウンを設定（空白も選択可能）
   const rule1 = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['星座', '誕生月'], true)
+    .requireValueInList(['', '星座', '誕生月'], true)
     .setAllowInvalid(false)
     .build();
   sheet.getRange('A3').setDataValidation(rule1);
 
-  // A4にドロップダウンを設定
+  // A4にドロップダウンを設定（空白も選択可能）
   const rule2 = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['血液型', '誕生月'], true)
+    .requireValueInList(['', '血液型', '誕生月'], true)
     .setAllowInvalid(false)
     .build();
   sheet.getRange('A4').setDataValidation(rule2);
