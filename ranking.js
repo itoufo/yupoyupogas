@@ -142,6 +142,10 @@ function executeRankingStep1(sheet, apiKey, theme, type1, type2) {
   // D5:E34に出力
   sheet.getRange('D5').setValue(designText);
 
+  // STEP2のプロンプトを更新（type1とtype2が確定したので）
+  const promptStep2 = getRankingContentsPrompt(theme, type1, type2, '{{designText}}');
+  sheet.getRange('C5').setValue(promptStep2);
+
   // ログ出力
   addLog(sheet, 'ランキングSTEP1: ランキング設計', promptDesign, designText, startTime, endTime);
 
