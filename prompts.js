@@ -348,6 +348,21 @@ function getRankingDesignPrompt(theme, type1, type2) {
  * @returns {string} プロンプトテキスト
  */
 function getRankingContentsPrompt(theme, type1, type2, designText) {
+  // 組み合わせ総数を計算
+  let totalCount = 0;
+  if (type1 === '星座' && type2 === '血液型') {
+    totalCount = 48;
+  } else if (type1 === '誕生月' && type2 === '血液型') {
+    totalCount = 48;
+  } else if (type1 === '星座' && type2 === '誕生月') {
+    totalCount = 24;
+  } else if (type1 === '誕生月' && type2 === '誕生月') {
+    totalCount = 144;
+  }
+
+  // ランキング上限（組み合わせ総数と30のうち小さい方）
+  const maxRank = Math.min(30, totalCount);
+
   // 組み合わせの範囲を生成
   const combinations1 = type1 === '星座'
     ? '牡羊、牡牛、双子、蟹、獅子、乙女、天秤、蠍、射手、山羊、水瓶、魚'
@@ -397,26 +412,28 @@ function getRankingContentsPrompt(theme, type1, type2, designText) {
 
 上記以外の組み合わせは絶対に使用しないでください。
 例えば「牡羊×6月」「獅子×1月」「魚×12月」などはNG（現実にあり得ない）。
-30位全てが、この整合性を満たす組み合わせのみで構成されていることを確認してください。`;
+全ての順位が、この整合性を満たす組み合わせのみで構成されていることを確認してください。`;
   }
 
   return `あなたは日本語の「占い師」です。ランキングコンテンツを生成します。
 
 ランキングテーマ：「${theme}」
-分類タイプ：${type1} × ${type2}
+分類タイプ：${type1} × ${type2}（合計${totalCount}通り）
 ${consistencyNote}
 
 【ランキング設計】
 ${designText}
 
 タスク：
-上記の設計に基づき、1位から30位までのランキングを生成してください。
+上記の設計に基づき、1位から${maxRank}位までのランキングを生成してください。
+※重要：組み合わせは${totalCount}通りしかないため、各組み合わせは1回のみ使用し、重複は絶対に禁止です。
 
 組み合わせの範囲：
 - ${type1}：${combinations1}
 - ${type2}：${combinations2}
 
 重要制約：
+- **組み合わせの重複は絶対に禁止**（各組み合わせは1回のみ使用）
 - 各順位の説明は**30文字以内**（簡潔で印象的に）
 - ポジティブな表現（下位でも前向きに）
 - 絵文字・ハッシュタグは使用しない（本文のみ）
