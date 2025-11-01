@@ -404,9 +404,10 @@ function getRankingContentsPrompt(theme, type1, type2, designText) {
 
 ランキングテーマ：「${theme}」
 分類タイプ：${type1} × ${type2}
+${consistencyNote}
 
 【ランキング設計】
-${designText}${consistencyNote}
+${designText}
 
 タスク：
 上記の設計に基づき、1位から30位までのランキングを生成してください。
@@ -424,6 +425,7 @@ ${designText}${consistencyNote}
 - 小学生でもわかる単語だけを使うこと
 - 漢字は使わないで、ひらがなで
 - とにかく、簡単な表現で！！！
+${consistencyNote}
 
 出力形式（JSON）：
 {
