@@ -9,9 +9,9 @@ function generateRankingContent() {
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
-  const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
-  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+  const theme = String(sheet.getRange('A2').getValue() || '').trim().replace(/　/g, '');
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim().replace(/　/g, '');
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim().replace(/　/g, '');
 
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
   if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
@@ -50,9 +50,9 @@ function generateRankingStep1Only() {
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
-  const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
-  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+  const theme = String(sheet.getRange('A2').getValue() || '').trim().replace(/　/g, '');
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim().replace(/　/g, '');
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim().replace(/　/g, '');
 
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
   if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
@@ -83,9 +83,9 @@ function generateRankingStep2Only() {
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
   // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
-  const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
-  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+  const theme = String(sheet.getRange('A2').getValue() || '').trim().replace(/　/g, '');
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim().replace(/　/g, '');
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim().replace(/　/g, '');
 
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
   if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
