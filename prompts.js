@@ -260,8 +260,8 @@ function getRankingDesignPrompt(theme, type1, type2) {
     combinationDesc = '12ヶ月 × 血液型（A、B、O、AB）';
     totalCount = 48;
   } else if (type1 === '星座' && type2 === '誕生月') {
-    combinationDesc = '12星座 × 12ヶ月（誕生月）';
-    totalCount = 144;
+    combinationDesc = '12星座 × 対応する誕生月（各星座2ヶ月のみ）';
+    totalCount = 24;
   } else if (type1 === '誕生月' && type2 === '誕生月') {
     combinationDesc = '誕生月 × 誕生月';
     totalCount = 144;
