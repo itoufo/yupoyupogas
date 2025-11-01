@@ -171,6 +171,12 @@ function execute12ZodiacStep2(sheet, apiKey, theme, subThemes) {
 function initialize12ZodiacSheet() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
+  // シート名を更新（数字を継承）
+  const currentName = sheet.getName();
+  const numberMatch = currentName.match(/\d+/); // 数字を抽出
+  const newName = numberMatch ? `12星座${numberMatch[0]}` : '12星座';
+  sheet.setName(newName);
+
   // 既存の結合を解除
   const maxRows = sheet.getMaxRows();
   const maxCols = sheet.getMaxColumns();

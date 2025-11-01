@@ -8,13 +8,21 @@ function generateRankingContent() {
   const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
-  // 入力取得（A2:テーマ、A3:星座or誕生月）
+  // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type = String(sheet.getRange('A3').getValue() || '').trim();
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
-  if (!type) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
-  if (type !== '星座' && type !== '誕生月') {
+  if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
+  if (!type2) { SpreadsheetApp.getUi().alert('A4 に「血液型」または「誕生月」を選択してください'); return; }
+
+  if (type1 !== '星座' && type1 !== '誕生月') {
     SpreadsheetApp.getUi().alert('A3 には「星座」または「誕生月」のいずれかを入力してください');
+    return;
+  }
+  if (type2 !== '血液型' && type2 !== '誕生月') {
+    SpreadsheetApp.getUi().alert('A4 には「血液型」または「誕生月」のいずれかを入力してください');
     return;
   }
 
@@ -27,10 +35,10 @@ function generateRankingContent() {
   }
 
   // STEP1実行
-  const designText = executeRankingStep1(sheet, apiKey, theme, type);
+  const designText = executeRankingStep1(sheet, apiKey, theme, type1, type2);
 
   // STEP2実行
-  executeRankingStep2(sheet, apiKey, theme, type, designText);
+  executeRankingStep2(sheet, apiKey, theme, type1, type2, designText);
 
   SpreadsheetApp.getUi().alert('完了：D5:E34にランキング設計、F5以降に横並び版、S5以降に縦並び版を出力しました。');
 }
@@ -41,13 +49,21 @@ function generateRankingStep1Only() {
   const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
-  // 入力取得（A2:テーマ、A3:星座or誕生月）
+  // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type = String(sheet.getRange('A3').getValue() || '').trim();
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
-  if (!type) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
-  if (type !== '星座' && type !== '誕生月') {
+  if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
+  if (!type2) { SpreadsheetApp.getUi().alert('A4 に「血液型」または「誕生月」を選択してください'); return; }
+
+  if (type1 !== '星座' && type1 !== '誕生月') {
     SpreadsheetApp.getUi().alert('A3 には「星座」または「誕生月」のいずれかを入力してください');
+    return;
+  }
+  if (type2 !== '血液型' && type2 !== '誕生月') {
+    SpreadsheetApp.getUi().alert('A4 には「血液型」または「誕生月」のいずれかを入力してください');
     return;
   }
 
@@ -55,7 +71,7 @@ function generateRankingStep1Only() {
   sheet.getRange('D5:E34').clearContent();
 
   // STEP1実行
-  executeRankingStep1(sheet, apiKey, theme, type);
+  executeRankingStep1(sheet, apiKey, theme, type1, type2);
 
   SpreadsheetApp.getUi().alert('STEP1完了：D5:E34 にランキング設計を出力しました。');
 }
@@ -66,13 +82,21 @@ function generateRankingStep2Only() {
   const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません。');
 
-  // 入力取得（A2:テーマ、A3:星座or誕生月）
+  // 入力取得（A2:テーマ、A3:固定軸、A4:掛け合わせ軸）
   const theme = String(sheet.getRange('A2').getValue() || '').trim();
-  const type = String(sheet.getRange('A3').getValue() || '').trim();
+  const type1 = String(sheet.getRange('A3').getValue() || '').trim();
+  const type2 = String(sheet.getRange('A4').getValue() || '').trim();
+
   if (!theme) { SpreadsheetApp.getUi().alert('A2 にランキングテーマを入力してください（例：2025年の恋愛運）'); return; }
-  if (!type) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
-  if (type !== '星座' && type !== '誕生月') {
+  if (!type1) { SpreadsheetApp.getUi().alert('A3 に「星座」または「誕生月」を選択してください'); return; }
+  if (!type2) { SpreadsheetApp.getUi().alert('A4 に「血液型」または「誕生月」を選択してください'); return; }
+
+  if (type1 !== '星座' && type1 !== '誕生月') {
     SpreadsheetApp.getUi().alert('A3 には「星座」または「誕生月」のいずれかを入力してください');
+    return;
+  }
+  if (type2 !== '血液型' && type2 !== '誕生月') {
+    SpreadsheetApp.getUi().alert('A4 には「血液型」または「誕生月」のいずれかを入力してください');
     return;
   }
 
@@ -91,23 +115,24 @@ function generateRankingStep2Only() {
   }
 
   // STEP2実行
-  executeRankingStep2(sheet, apiKey, theme, type, designText);
+  executeRankingStep2(sheet, apiKey, theme, type1, type2, designText);
 
   SpreadsheetApp.getUi().alert('STEP2完了：F5以降に横並び版、S5以降に縦並び版を出力しました。');
 }
 
 /* ===== STEP1実行（共通処理） ===== */
-function executeRankingStep1(sheet, apiKey, theme, type) {
+function executeRankingStep1(sheet, apiKey, theme, type1, type2) {
   // B5:B34からプロンプト取得、空なら初期化
   let promptDesign = String(sheet.getRange('B5').getValue() || '').trim();
   if (!promptDesign) {
-    promptDesign = getRankingDesignPrompt(theme, type);
+    promptDesign = getRankingDesignPrompt(theme, type1, type2);
     sheet.getRange('B5').setValue(promptDesign);
   } else {
     // テンプレート変数を置換
     promptDesign = promptDesign
       .replace(/\{\{theme\}\}/g, theme)
-      .replace(/\{\{type\}\}/g, type);
+      .replace(/\{\{type1\}\}/g, type1)
+      .replace(/\{\{type2\}\}/g, type2);
   }
 
   const startTime = new Date();
@@ -124,17 +149,18 @@ function executeRankingStep1(sheet, apiKey, theme, type) {
 }
 
 /* ===== STEP2実行（共通処理） ===== */
-function executeRankingStep2(sheet, apiKey, theme, type, designText) {
+function executeRankingStep2(sheet, apiKey, theme, type1, type2, designText) {
   // C5:C34からプロンプト取得、空なら初期化
   let promptRanking = String(sheet.getRange('C5').getValue() || '').trim();
   if (!promptRanking) {
-    promptRanking = getRankingContentsPrompt(theme, type, designText);
+    promptRanking = getRankingContentsPrompt(theme, type1, type2, designText);
     sheet.getRange('C5').setValue(promptRanking);
   } else {
     // テンプレート変数を置換
     promptRanking = promptRanking
       .replace(/\{\{theme\}\}/g, theme)
-      .replace(/\{\{type\}\}/g, type)
+      .replace(/\{\{type1\}\}/g, type1)
+      .replace(/\{\{type2\}\}/g, type2)
       .replace(/\{\{designText\}\}/g, designText);
   }
 
@@ -296,6 +322,12 @@ function executeRankingStep2(sheet, apiKey, theme, type, designText) {
 function initializeRankingSheet() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
+  // シート名を更新（数字を継承）
+  const currentName = sheet.getName();
+  const numberMatch = currentName.match(/\d+/); // 数字を抽出
+  const newName = numberMatch ? `ランク${numberMatch[0]}` : 'ランク';
+  sheet.setName(newName);
+
   // 既存の結合を解除
   const maxRows = sheet.getMaxRows();
   const maxCols = sheet.getMaxColumns();
@@ -320,16 +352,24 @@ function initializeRankingSheet() {
   sheet.getRange('AC35').setValue('リクエスト');
   sheet.getRange('AD35').setValue('レスポンス');
 
-  // 入力エリア（2-3行目）
+  // 入力エリア（2-4行目）
   sheet.getRange('A2').setValue('ランキングテーマを入力（例：2025年の恋愛運）');
   sheet.getRange('A3').setValue('星座 or 誕生月を選択');
+  sheet.getRange('A4').setValue('血液型 or 誕生月を選択');
 
   // A3にドロップダウンを設定
-  const rule = SpreadsheetApp.newDataValidation()
+  const rule1 = SpreadsheetApp.newDataValidation()
     .requireValueInList(['星座', '誕生月'], true)
     .setAllowInvalid(false)
     .build();
-  sheet.getRange('A3').setDataValidation(rule);
+  sheet.getRange('A3').setDataValidation(rule1);
+
+  // A4にドロップダウンを設定
+  const rule2 = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['血液型', '誕生月'], true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange('A4').setDataValidation(rule2);
 
   // サブヘッダー（4行目）
   sheet.getRange('B4').setValue('▼ STEP1プロンプト本文');
@@ -339,11 +379,11 @@ function initializeRankingSheet() {
   sheet.getRange('S4:AA4').merge().setValue('▼ STEP2出力（縦並び）');
 
   // デフォルトプロンプトを配置（5行目から縦30行結合）
-  const defaultPrompt1 = getRankingDesignPrompt('{{theme}}', '{{type}}');
+  const defaultPrompt1 = getRankingDesignPrompt('{{theme}}', '{{type1}}', '{{type2}}');
   sheet.getRange('B5').setValue(defaultPrompt1);
   sheet.getRange('B5:B34').merge();
 
-  const defaultPrompt2 = getRankingContentsPrompt('{{theme}}', '{{type}}', '{{designText}}');
+  const defaultPrompt2 = getRankingContentsPrompt('{{theme}}', '{{type1}}', '{{type2}}', '{{designText}}');
   sheet.getRange('C5').setValue(defaultPrompt2);
   sheet.getRange('C5:C34').merge();
 
@@ -353,7 +393,7 @@ function initializeRankingSheet() {
   // フォーマット適用
   formatRankingSheet(sheet);
 
-  SpreadsheetApp.getUi().alert('ランキングシートを初期化しました。A2にテーマ、A3に「星座」または「誕生月」を選択してください。');
+  SpreadsheetApp.getUi().alert('ランキングシートを初期化しました。\nA2: テーマ\nA3: 星座 or 誕生月\nA4: 血液型 or 誕生月');
 }
 
 /* ===== ランキングシートフォーマッティング ===== */
@@ -372,8 +412,8 @@ function formatRankingSheet(sheet) {
                 .setFontColor('#ffffff')
                 .setHorizontalAlignment('center');
 
-  // 入力エリア（A2:A3）
-  sheet.getRange('A2:A3').setBackground('#fff2cc');
+  // 入力エリア（A2:A4）
+  sheet.getRange('A2:A4').setBackground('#fff2cc');
 
   // プロンプトエリア（B5:B34, C5:C34）
   sheet.getRange('B5:B34').setBackground('#d9ead3')

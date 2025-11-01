@@ -61,6 +61,12 @@ function executeHoroscope(sheet, apiKey, date) {
 function initializeHoroscopeSheet() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
+  // シート名を更新（数字を継承）
+  const currentName = sheet.getName();
+  const numberMatch = currentName.match(/\d+/); // 数字を抽出
+  const newName = numberMatch ? `今日の占い${numberMatch[0]}` : '今日の占い';
+  sheet.setName(newName);
+
   // シートをクリア（1行目以外）
   const lastRow = sheet.getMaxRows();
   const lastCol = sheet.getMaxColumns();

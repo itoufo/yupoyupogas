@@ -156,6 +156,12 @@ function executeStep2(sheet, apiKey, method, storyText) {
 function initializeSheet() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
+  // シート名を更新（数字を継承）
+  const currentName = sheet.getName();
+  const numberMatch = currentName.match(/\d+/); // 数字を抽出
+  const newName = numberMatch ? `ストーリー${numberMatch[0]}` : 'ストーリー';
+  sheet.setName(newName);
+
   // 既存の結合を解除
   const maxRows = sheet.getMaxRows();
   const maxCols = sheet.getMaxColumns();
